@@ -1,0 +1,20 @@
+traefik:
+  hostname: traefik
+  image: traefik:latest
+  container_name: traefik
+  restart: always
+  domainname: ${DOMAINNAME}
+  ports:
+    - "80:80"
+    - "443:443"
+    - "8080:8080"
+  labels:
+    - "traefik.enable=true"
+    - "traefik.backend=traefik"
+    - "traefik.frontend.rule=Host:traefik.${DOMAINNAME}"  
+    - "traefik.port=8080"
+    - "traefik.docker.network=traefik_proxy"
+  volumes:
+    - /var/run/docker.sock:/var/run/docker.sock:ro
+    - ${USERDIR}/docker/traefik:/etc/traefik
+    - ${USERDIR}/docker/shared:/shared
