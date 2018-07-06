@@ -45,54 +45,9 @@ Create an empty acme.json file for Traefik to use:
     chmod 500 ${USERDIR}/docker/traefik/acme/acme.json
 
 ## Configure Traefik to use Let's Encrypt
-We'll set up Traefik to use subdomains for the different apps that we want to run. Create `${USERDIR}/docker/traefik/traefik.toml` with the following content:
+We'll set up Traefik to use subdomains for the different apps that we want to run. Create `${USERDIR}/docker/traefik/traefik.toml` with the contents of the following file:
 
-    #debug = true
-
-    logLevel = "ERROR" #DEBUG, INFO, WARN, ERROR, FATAL, PANIC
-    # InsecureSkipVerify = true 
-    defaultEntryPoints = ["https", "http"]
-
-    # WEB interface of Traefik - it will show web page with overview of frontend and backend configurations 
-    [web]
-    address = ":8080"
-      [web.auth.basic]
-      usersFile = "/shared/.htpasswd"
-
-    # Force HTTPS
-    [entryPoints]
-      [entryPoints.http]
-      address = ":80"
-        [entryPoints.http.redirect]
-        entryPoint = "https"
-      [entryPoints.https]
-      address = ":443"
-        [entryPoints.https.tls]
-
-    [file]
-      watch = true
-      filename = "/etc/traefik/rules.toml"
-
-    # Let's encrypt configuration
-    [acme]
-    email = "email@domain.com" #any email id will work
-    storage="/etc/traefik/acme/acme.json"
-    entryPoint = "https"
-    acmeLogging=true 
-    onDemand = false #create certificate when container is created
-    [[acme.domains]]
-       main = "EXAMPLE.COM"
-    [[acme.domains]]
-       main = "*.EXAMPLE.COM"
-   
-    # Connection to docker host system (docker.sock)
-    [docker]
-    endpoint = "unix:///var/run/docker.sock"
-    domain = "EXAMPLE.COM"
-    watch = true
-    # This will hide all docker containers that don't have explicitly  
-    # set label to "enable"
-    exposedbydefault = false
+[traefik.toml](traefik.toml)
 
 Replace the following:
 1. `email@domain.com` with your email address
@@ -103,23 +58,4 @@ Replace the following:
 ## Run Traefik
 Create a docker-compose.yml with the following content:
 
-    traefik:
-      hostname: traefik
-      image: traefik:latest
-      container_name: traefik
-      restart: always
-      domainname: ${DOMAINNAME}
-      ports:
-        - "80:80"
-        - "443:443"
-        - "8080:8080"
-      labels:
-        - "traefik.enable=true"
-        - "traefik.backend=traefik"
-        - "traefik.frontend.rule=Host:traefik.${DOMAINNAME}"  
-        - "traefik.port=8080"
-        - "traefik.docker.network=traefik_proxy"
-      volumes:
-        - /var/run/docker.sock:/var/run/docker.sock:ro
-        - ${USERDIR}/docker/traefik:/etc/traefik
-        - ${USERDIR}/docker/shared:/shared
+[docker-compose.yml](docker-compose.yml)
