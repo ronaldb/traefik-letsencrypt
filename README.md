@@ -99,3 +99,27 @@ Replace the following:
 2. `EXAMPLE.COM` with your domain name
 3. You may have to enable the InsecureSkipVerify line to allow some apps access through Traefik
 4. `exposedbydefault = false` forces you to use `traefik.enable=true` in docker compose to put apps behind traefik. If you would like to do this for all apps, change it to exposedbydefault to true.
+
+## Run Traefik
+Create a docker-compose.yml with the following content:
+
+    traefik:
+      hostname: traefik
+      image: traefik:latest
+      container_name: traefik
+      restart: always
+      domainname: ${DOMAINNAME}
+      ports:
+        - "80:80"
+        - "443:443"
+        - "8080:8080"
+      labels:
+        - "traefik.enable=true"
+        - "traefik.backend=traefik"
+        - "traefik.frontend.rule=Host:traefik.${DOMAINNAME}"  
+        - "traefik.port=8080"
+        - "traefik.docker.network=traefik_proxy"
+      volumes:
+        - /var/run/docker.sock:/var/run/docker.sock:ro
+        - ${USERDIR}/docker/traefik:/etc/traefik
+        - ${USERDIR}/docker/shared:/shared
